@@ -1,7 +1,7 @@
 rm(list=ls())
 source("Digikala Product - Functions.R")
 ###----------------------------------- Number of Pages
-page <- 2
+page <- 1
 ###----------------------------------- URLs List
 url0 <- c()
 for(l in 1:page) {
