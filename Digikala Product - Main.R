@@ -1,10 +1,10 @@
 rm(list=ls())
 source("Digikala Product - Functions.R")
-###----------------------------------- Number of Pages
-page <- 1
+###----------------------------------- Web Pages (from:to)
+page <- 1:10
 ###----------------------------------- URLs List
 url0 <- c()
-for(l in 1:page) {
+for(l in page) {
   url0[l] <- paste("https://www.digikala.com/search/category-men-sport-shoes-/", "?pageno=", l, "&sortby=4", sep = "")
 }
 ###----------------------------------- Data Collection
@@ -23,4 +23,3 @@ t <- Sys.time() - t0
 t
 ###----------------------------------- Data Analysis
 View(dt)
-p.price <- as.numeric(dt[, 3])
