@@ -1,7 +1,7 @@
 rm(list=ls())
 source("Digikala Product - Functions.R")
 ###----------------------------------- Web Pages (from:to)
-page <- 1:5
+page <- 1:2
 ###----------------------------------- URLs List
 url0 <- c()
 for(l in page) {
@@ -25,3 +25,4 @@ tt <- Sys.time() - t0
 tt
 ###----------------------------------- Data Analysis
 View(dt)
+save(dt, file = "DKData.RData")

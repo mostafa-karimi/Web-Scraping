@@ -1,0 +1,72 @@
+---
+title: "Digikala Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+runtime: shiny
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r packages, include = FALSE}
+library(ggplot2)
+library(DT)
+```
+
+```{r data, include = FALSE}
+load("DKData.RData")
+```
+
+page 1
+======
+
+sidebar {.sidebar}
+------------------
+
+```{r}
+
+```
+
+Row
+---
+    
+### Chart 1
+    
+```{r}
+
+```
+    
+### Chart 2
+    
+```{r}
+
+```
+    
+Row
+---    
+    
+### Chart 3
+
+```{r}
+
+```
+    
+### Chart 4
+    
+```{r}
+
+```
+
+page 2
+======
+
+sidebar {.sidebar}
+------------------
+
+```{r}
+
+```
+
