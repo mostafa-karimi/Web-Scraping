@@ -13,11 +13,21 @@ get_url <- function(url0) {
   }
   url
 }
-# url <- "https://www.digikala.com/product/dkp-1419760/%DA%A9%D9%81%D8%B4-%D9%85%D8%AE%D8%B5%D9%88%D8%B5-%D9%BE%DB%8C%D8%A7%D8%AF%D9%87-%D8%B1%D9%88%DB%8C-%D9%85%D8%B1%D8%AF%D8%A7%D9%86%D9%87-%D9%85%D8%AF%D9%84-dharma"
-# url <- "https://www.digikala.com/product/dkp-676487/%DA%A9%D9%81%D8%B4-%D9%88%D8%B1%D8%B2%D8%B4%DB%8C-%D9%85%D8%B1%D8%AF%D8%A7%D9%86%D9%87-%D9%85%D8%AF%D9%84-rzai"
-# url <- "https://www.digikala.com/product/dkp-1696173/%DA%A9%D9%81%D8%B4-%D9%85%D8%AE%D8%B5%D9%88%D8%B5-%D9%BE%DB%8C%D8%A7%D8%AF%D9%87-%D8%B1%D9%88%DB%8C-%D9%85%D8%B1%D8%AF%D8%A7%D9%86%D9%87-%D9%85%D8%AF%D9%84-adi-super-%D8%B1%D9%86%DA%AF-%D8%B7%D9%88%D8%B3%DB%8C"
-# url <- "https://www.digikala.com/product/dkp-2437788/%DA%A9%D9%81%D8%B4-%D8%B1%D8%A7%D8%AD%D8%AA%DB%8C-%D9%85%D8%B1%D8%AF%D8%A7%D9%86%D9%87-%D9%85%D8%AF%D9%84-part-so"
-# url <- "https://www.digikala.com/product/dkp-3126378/%DA%A9%D9%81%D8%B4-%D9%85%D8%AE%D8%B5%D9%88%D8%B5-%D9%BE%DB%8C%D8%A7%D9%87-%D8%B1%D9%88%DB%8C-%D8%B2%D9%86%D8%A7%D9%86%D9%87-%D9%85%D8%AF%D9%84-bk33"
+###----------------------------------- Function: get_error()
+get_error <- function(url) {
+  err <- c()
+  count <- 1
+  for(r in 1:length(url)) {
+    rh <- read_html(url[r])
+    adc <- xml_attr(xml_find_all(rh, ".//div"), "class")
+    urlseller <- as.character(xml_find_all(rh, ".//div")[which(adc == "c-product-info-box__row u-text-bold")])
+    urlseller <- unlist(str_split(unlist(str_split(urlseller, "="))[5], ""))[-1]
+    urlseller <- paste(urlseller[-c((length(urlseller)-6):length(urlseller))], collapse = "")
+    urlseller <- paste("https://www.digikala.com", urlseller, sep = "")
+    tryCatch(read_html(urlseller), error = function(x) {print(r); err[count] <<- r; count <<- count + 1})
+  }
+  err
+}
 ###----------------------------------- Function: read_page()
 read_page <- function(url) {
   ###----------------------------------- Function: petoen()
@@ -156,29 +166,50 @@ read_page <- function(url) {
   urlseller <- unlist(str_split(unlist(str_split(urlseller, "="))[5], ""))[-1]
   urlseller <- paste(urlseller[-c((length(urlseller)-6):length(urlseller))], collapse = "")
   urlseller <- paste("https://www.digikala.com", urlseller, sep = "")
-  rhseller <- read_html(urlseller)
-  adcseller <- xml_attr(xml_find_all(rhseller, ".//div"), "class")
-  spsu <- xml_text(xml_find_all(rhseller, ".//div")[which(adcseller == "c-profile-box-seller__details")])
-  spsu <- unlist(str_split(str_replace_all(spsu, "  ", ""), "\n"))[c(1, 5, 9, 13, 17, 21, 22)]
-  spsu1 <- paste(unlist(str_split(spsu[1], ""))[-length(unlist(str_split(spsu[1], "")))], collapse = "")
-  spsu2 <- paste(unlist(str_split(spsu[2], ""))[-length(unlist(str_split(spsu[2], "")))], collapse = "")
-  spsu3 <- paste(unlist(str_split(spsu[3], ""))[-length(unlist(str_split(spsu[3], "")))], collapse = "")
-  spsu4 <- paste(unlist(str_split(spsu[4], ""))[-length(unlist(str_split(spsu[4], "")))], collapse = "")
-  spsu5 <- paste(unlist(str_split(spsu[5], ""))[-length(unlist(str_split(spsu[5], "")))], collapse = "")
-  spsu6 <- paste(unlist(str_split(spsu[6], ""))[-length(unlist(str_split(spsu[6], "")))], collapse = "")
-  spsu7 <- paste(unlist(str_split(unlist(str_split(spsu[7], " "))[1], ""))[-1], collapse = "")
-  if(!is.na(spsu7) && !is.null(spsu7)) {
-    if(sum(unlist(str_split(spsu7, "")) == ",") > 0) {
-      spsu7 <- paste(unlist(str_split(spsu7, ""))[-which(unlist(str_split(spsu7, "")) == ",")], collapse = "")
+  cond <- TRUE
+  tryCatch(read_html(urlseller), error = function(x) {cond <<- FALSE})
+  if(cond) {
+    rhseller <- read_html(urlseller)
+    adcseller <- xml_attr(xml_find_all(rhseller, ".//div"), "class")
+    spsu <- xml_text(xml_find_all(rhseller, ".//div")[which(adcseller == "c-profile-box-seller__details")])
+    spsu <- unlist(str_split(str_replace_all(spsu, "  ", ""), "\n"))[c(1, 5, 9, 13, 17, 21, 22)]
+    spsu1 <- paste(unlist(str_split(spsu[1], ""))[-length(unlist(str_split(spsu[1], "")))], collapse = "")
+    spsu2 <- paste(unlist(str_split(spsu[2], ""))[-length(unlist(str_split(spsu[2], "")))], collapse = "")
+    spsu3 <- paste(unlist(str_split(spsu[3], ""))[-length(unlist(str_split(spsu[3], "")))], collapse = "")
+    spsu4 <- paste(unlist(str_split(spsu[4], ""))[-length(unlist(str_split(spsu[4], "")))], collapse = "")
+    spsu5 <- paste(unlist(str_split(spsu[5], ""))[-length(unlist(str_split(spsu[5], "")))], collapse = "")
+    spsu6 <- paste(unlist(str_split(spsu[6], ""))[-length(unlist(str_split(spsu[6], "")))], collapse = "")
+    spsu7 <- paste(unlist(str_split(unlist(str_split(spsu[7], " "))[1], ""))[-1], collapse = "")
+    if(!is.na(spsu7) && !is.null(spsu7)) {
+      if(sum(unlist(str_split(spsu7, "")) == ",") > 0) {
+        spsu7 <- paste(unlist(str_split(spsu7, ""))[-which(unlist(str_split(spsu7, "")) == ",")], collapse = "")
+      }
     }
+    splc <- xml_text(xml_find_all(rhseller, ".//div")[which(adcseller == "c-listing__counter")])
+    splc <- unlist(str_split(str_replace_all(splc, "  ", ""), " "))[1]
+    if(!is.na(splc) && !is.null(splc)) {
+      if(sum(unlist(str_split(splc, "")) == ",") > 0) {
+        splc <- paste(unlist(str_split(splc, ""))[-which(unlist(str_split(splc, "")) == ",")], collapse = "")
+      }
+    }
+    seller.product.listing <- ifelse(is.double(petoen(splc)), petoen(splc), NA)
+    seller.satisfaction.overall <- ifelse(is.double(petoen(spsu1)), petoen(spsu1), NA)
+    seller.satisfaction.overall.user <- ifelse(is.double(petoen(spsu7)), petoen(spsu7), NA)
+    seller.satisfaction.overall.totally.satisfied <- ifelse(is.double(petoen(spsu2)), petoen(spsu2), NA)
+    seller.satisfaction.overall.satisfied <- ifelse(is.double(petoen(spsu3)), petoen(spsu3), NA)
+    seller.satisfaction.overall.neutral <- ifelse(is.double(petoen(spsu4)), petoen(spsu4), NA)
+    seller.satisfaction.overall.dissatisfied <- ifelse(is.double(petoen(spsu5)), petoen(spsu5), NA)
+    seller.satisfaction.overall.totally.dissatisfied <- ifelse(is.double(petoen(spsu6)), petoen(spsu6), NA)
+  } else {
+    seller.product.listing <- NA
+    seller.satisfaction.overall <- NA
+    seller.satisfaction.overall.user <- NA
+    seller.satisfaction.overall.totally.satisfied <- NA
+    seller.satisfaction.overall.satisfied <- NA
+    seller.satisfaction.overall.neutral <- NA
+    seller.satisfaction.overall.dissatisfied <- NA
+    seller.satisfaction.overall.totally.dissatisfied <- NA
   }
-  seller.satisfaction.overall <- ifelse(is.double(petoen(spsu1)), petoen(spsu1), NA)
-  seller.satisfaction.overall.user <- ifelse(is.double(petoen(spsu7)), petoen(spsu7), NA)
-  seller.satisfaction.overall.totally.satisfied <- ifelse(is.double(petoen(spsu2)), petoen(spsu2), NA)
-  seller.satisfaction.overall.satisfied <- ifelse(is.double(petoen(spsu3)), petoen(spsu3), NA)
-  seller.satisfaction.overall.neutral <- ifelse(is.double(petoen(spsu4)), petoen(spsu4), NA)
-  seller.satisfaction.overall.dissatisfied <- ifelse(is.double(petoen(spsu5)), petoen(spsu5), NA)
-  seller.satisfaction.overall.totally.dissatisfied <- ifelse(is.double(petoen(spsu6)), petoen(spsu6), NA)
   ###----------------------------------- Product Specifications
   pbt <- xml_text(xml_find_all(rh, ".//span")[which(asc == "product-brand-title")])
   pbt <- unlist(str_split(str_replace_all(pbt, "  ", ""), "\n"))
@@ -208,7 +239,8 @@ read_page <- function(url) {
                            seller.satisfaction.product.satisfied,
                            seller.satisfaction.product.neutral,
                            seller.satisfaction.product.dissatisfied,
-                           seller.satisfaction.product.totally.dissatisfied, 
+                           seller.satisfaction.product.totally.dissatisfied,
+                           seller.product.listing,
                            seller.satisfaction.overall,
                            seller.satisfaction.overall.user,
                            seller.satisfaction.overall.totally.satisfied,
@@ -216,7 +248,8 @@ read_page <- function(url) {
                            seller.satisfaction.overall.neutral,
                            seller.satisfaction.overall.dissatisfied,
                            seller.satisfaction.overall.totally.dissatisfied,
-                           product.brand.title)
+                           product.brand.title,
+                           product.specification[length(product.specification)-1])
   ))
   rownames(df) <- c("Product Title",
                     "Fake Badge",
@@ -242,6 +275,7 @@ read_page <- function(url) {
                     "seller Satisfaction Product (%) - Neutral",
                     "seller Satisfaction Product (%) - Dissatisfied",
                     "seller Satisfaction Product (%) - Totally Dissatisfied",
+                    "seller Product Listing",
                     "seller Satisfaction Overall (%)",
                     "seller Satisfaction Overall - User",
                     "seller Satisfaction Overall (%) - Totally Satisfied",
@@ -249,12 +283,9 @@ read_page <- function(url) {
                     "seller Satisfaction Overall (%) - Neutral",
                     "seller Satisfaction Overall (%) - Dissatisfied",
                     "seller Satisfaction Overall (%) - Totally Dissatisfied",
-                    "Product Brand")
+                    "Product Brand",
+                    "Product Category")
   colnames(df) <- "value"
-  df0 <- data.frame(cbind(product.specification[length(product.specification)-1]))
-  rownames(df0) <- "Product Category"
-  colnames(df0) <- "value"
-  df <- rbind(df, df0)
   df
 }
 # View(df)

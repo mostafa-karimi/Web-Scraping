@@ -1,7 +1,7 @@
 rm(list=ls())
 source("Digikala Product - Functions.R")
 ###----------------------------------- Web Pages (from:to)
-page <- 1:10
+page <- 1:5
 ###----------------------------------- URLs List
 url0 <- c()
 for(l in page) {
@@ -16,10 +16,12 @@ for(n in 1:length(url0)) {
   for(k in 1:length(url)) {
     results <- rbind(results, t(read_page(url[k])))
     rownames(results) <- NULL
+    print(paste("product", k, "of page", n))
   }
   dt <- rbind(dt, results)
+  print(Sys.time() - t0)
 }
-t <- Sys.time() - t0
-t
+tt <- Sys.time() - t0
+tt
 ###----------------------------------- Data Analysis
 View(dt)
