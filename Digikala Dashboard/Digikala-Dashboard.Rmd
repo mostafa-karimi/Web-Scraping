@@ -18,46 +18,135 @@ library(DT)
 
 ```{r data, include = FALSE}
 load("DKData.RData")
+data <- dt
 ```
 
-page 1
-======
+Product Price
+=============
 
-sidebar {.sidebar}
+sidebar {.sidebar data-width=330}
 ------------------
 
-```{r}
+***
 
+```{r}
+numericInput("pricebin", "Price Bin:", 10000, min = 0)
+```
+
+```{r}
+sliderInput("pricerange", "Price Range:",
+            min = max(0, (round(min(as.numeric(data[, 3])) / 10000) * 10000) - 10000),
+            max = (round(max(as.numeric(data[, 3])) / 10000) * 10000) + 10000,
+            value = c(round(min(as.numeric(data[, 3])) / 10000) * 10000,
+                      round(max(as.numeric(data[, 3])) / 10000) * 10000),
+            step = 10000)
+```
+
+
+```{r}
+sliderInput("pricerangep", "Previous Price Range:",
+            min = max(0, (round(min(as.numeric(data[, 4])) / 10000) * 10000) - 10000),
+            max = (round(max(as.numeric(data[, 4])) / 10000) * 10000) + 10000,
+            value = c(round(min(as.numeric(data[, 4])) / 10000) * 10000,
+                      round(max(as.numeric(data[, 4])) / 10000) * 10000),
+            step = 10000)
+```
+
+```{r}
+sliderInput("priceranged", "Price Discount Range:",
+            min = 0,
+            max = 100,
+            value = c(1, max(as.numeric(data[, 5]))),
+            step = 1)
+```
+
+Row
+---
+
+### Price 
+    
+```{r histogram_price}
+renderPlot({
+d.price <- data.frame(d.price = as.numeric(data[, 3])[as.numeric(data[, 3]) >= input$pricerange[1] & 
+                            as.numeric(data[, 3]) <= input$pricerange[2]])
+ch.h.price <- ggplot(d.price, aes(x = d.price)) + 
+  geom_histogram(binwidth = input$pricebin,
+                 color = "darkblue", 
+                 fill = "lightblue") +
+  xlab(" ") + ylab("Frequency")
+ch.h.price
+})
+```
+
+### Previous Price
+
+```{r histogram_price_p}
+renderPlot({
+d.price.p <- data.frame(d.price.p = as.numeric(data[, 4])[as.numeric(data[, 4]) >= input$pricerangep[1] & 
+                            as.numeric(data[, 4]) <= input$pricerangep[2]])
+ch.h.price.p <- ggplot(d.price.p, aes(x = d.price.p)) + 
+  geom_histogram(binwidth = input$pricebin,
+                 color = "darkblue", 
+                 fill = "lightblue") +
+  xlab(" ") + ylab("Frequency")
+ch.h.price.p
+})
+```
+
+### Price Discount
+
+```{r histogram_price_d}
+renderPlot({
+d.price.d <- data.frame(d.price.d = as.numeric(data[, 5])[as.numeric(data[, 5]) >= input$priceranged[1] & 
+                            as.numeric(data[, 5]) <= input$priceranged[2]])
+ch.h.price.d <- ggplot(d.price.d, aes(x = d.price.d)) + 
+  geom_histogram(color = "darkblue", 
+                 fill = "lightblue") +
+  xlab(" ") + ylab("Frequency")
+ch.h.price.d
+})
 ```
 
 Row
 ---
     
-### Chart 1
-    
-```{r}
+### Price Summary
 
+```{r}
+renderTable({
+d.price <- data.frame(d.price = as.numeric(data[, 3])[as.numeric(data[, 3]) >= input$pricerange[1] & 
+                            as.numeric(data[, 3]) <= input$pricerange[2]])
+d.price.v <- unlist(as.vector(d.price))
+t.price <- data.frame(cbind(Stats = c("n", "Mean", "SD", "Median", "Min", "Max"),
+  value = c(length(d.price.v), round(mean(d.price.v)), round(sd(d.price.v)), median(d.price.v), min(d.price.v), max(d.price.v))))
+t.price
+})
 ```
     
-### Chart 2
+### Previous Price Summary
     
 ```{r}
-
+renderTable({
+d.price.p <- data.frame(d.price.p = as.numeric(data[, 4])[as.numeric(data[, 4]) >= input$pricerangep[1] & 
+                            as.numeric(data[, 4]) <= input$pricerangep[2]])
+d.price.pv <- unlist(as.vector(d.price.p))
+t.price.p <- data.frame(cbind(Stats = c("n", "Mean", "SD", "Median", "Min", "Max"),
+  value = c(length(d.price.pv), round(mean(d.price.pv)), round(sd(d.price.pv)), median(d.price.pv), min(d.price.pv), max(d.price.pv))))
+t.price.p
+})
 ```
-    
-Row
----    
-    
-### Chart 3
 
-```{r}
-
-```
-    
-### Chart 4
+### Price Discount Summary
     
 ```{r}
-
+renderTable({
+d.price.d <- data.frame(d.price.d = as.numeric(data[, 5])[as.numeric(data[, 5]) >= input$priceranged[1] & 
+                            as.numeric(data[, 5]) <= input$priceranged[2]])
+d.price.dv <- unlist(as.vector(d.price.d))
+t.price.d <- data.frame(cbind(Stats = c("n", "Mean", "SD", "Median", "Min", "Max"),
+  value = c(length(d.price.dv), round(mean(d.price.dv)), round(sd(d.price.dv)), median(d.price.dv), min(d.price.dv), max(d.price.dv))))
+t.price.d
+})
 ```
 
 page 2
